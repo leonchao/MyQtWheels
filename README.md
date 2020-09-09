@@ -1,2 +1,1 @@
-# MyQtWheels
-QtWheels
+1.圆形颜色选择器。
