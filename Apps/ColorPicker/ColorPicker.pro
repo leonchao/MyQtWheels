@@ -10,6 +10,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ColorPicker
 TEMPLATE = app
+CONFIG(debug, debug|release) {
+    DESTDIR = $$PWD/../../bin/debug
+} else {
+    DESTDIR = $$PWD/../../bin/release
+}
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings

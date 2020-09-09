@@ -25,7 +25,6 @@ private:
 
     static SqlConnector *_instance;
     QSqlDatabase _database;
-    QMutex _mutex;
 };
 
 #endif // SQLCONNECTOR_H

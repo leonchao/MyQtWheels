@@ -7,7 +7,6 @@ SqlConnector *SqlConnector::_instance = nullptr;
 
 SqlConnector *SqlConnector::getInstance()
 {
-    QMutexLocker(&_mutex);
     if(_instance == nullptr)
         _instance = new SqlConnector;
     return _instance;
@@ -15,7 +14,6 @@ SqlConnector *SqlConnector::getInstance()
 
 void SqlConnector::deleteInstance()
 {
-    QMutexLocker(&_mutex);
     if(_instance != nullptr)
         delete _instance;
     _instance = nullptr;
@@ -28,7 +26,6 @@ bool SqlConnector::isConnected()
 
 bool SqlConnector::connectToHost(QString hostName, QString password, int port, QString userName, QString dataBaseName)
 {
-    QMutexLocker(&_mutex);
     _database =QSqlDatabase::addDatabase("QMYSQL");
     _database.setHostName(hostName);      //连接数据库主机名，这里需要注意（若填的为”127.0.0.1“，出现不能连接，则改为localhost)
     _database.setPort(port);                 //连接数据库端口号，与设置一致
