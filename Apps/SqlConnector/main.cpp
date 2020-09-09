@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include "sqlconnector.h"
 
 int main(int argc, char *argv[])
 {
