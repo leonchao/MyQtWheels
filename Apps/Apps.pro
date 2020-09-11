@@ -23,4 +23,5 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SUBDIRS += \
     ColorPicker \
-    SqlConnector
+    SqlConnector \
+    SimplePlayer

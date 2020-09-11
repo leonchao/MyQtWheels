@@ -5,6 +5,11 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QLabel>
+#include <QToolButton>
+#include <QScreen>
+#include <QApplication>
+#include <QDebug>
+#include <QDesktopWidget>
 
 CColorWidget::CColorWidget(QColor color, QWidget *parent)
     : QWidget(parent),
@@ -61,6 +66,22 @@ CColorWidget::CColorWidget(QColor color, QWidget *parent)
     _definedColorList.append(QColor(0,0,0));
     _definedColorList.append(QColor(255,255,255));
     _definedColorList.append(QColor(255,255,0));
+
+    _pickColorBtn = new QToolButton(this);
+    connect(_pickColorBtn,&QToolButton::clicked,[this]{
+        _fullScreenImage = QApplication::primaryScreen()->grabWindow(QApplication::desktop()->winId());
+        if(_maskWidget == nullptr)
+            _maskWidget = new QWidget();
+        _maskWidget->setWindowFlags(_maskWidget->windowFlags() | Qt::FramelessWindowHint | Qt::Popup);
+        _maskWidget->resize(QApplication::primaryScreen()->geometry().size());
+        qDebug() << "222222222222222222222222" << _maskWidget->size() << QApplication::primaryScreen()->geometry();
+        _maskWidget->move(0,0);
+        _maskWidget->setWindowOpacity(0.1);
+        _maskWidget->raise();
+        _maskWidget->setMouseTracking(true);
+        _maskWidget->installEventFilter(this);
+        _maskWidget->show();
+    });
 }
 
 QColor CColorWidget::getCurrentColor()
@@ -147,6 +168,26 @@ void CColorWidget::mouseReleaseEvent(QMouseEvent *event)
     _isMousePressed = false;
 }
 
+bool CColorWidget::eventFilter(QObject *watched, QEvent *event)
+{
+    if(watched == _maskWidget)
+    {
+        if(event->type() == QEvent::MouseMove)
+        {
+            QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+            QRgb rgb = _fullScreenImage.toImage().pixel(mouseEvent->pos());
+            qDebug() << "111111111111111111" << qRed(rgb) << qGreen(rgb) << qBlue(rgb);
+        }
+        if(event->type() == QEvent::MouseButtonPress)
+        {
+            QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+            QRgb rgb = _fullScreenImage.toImage().pixel(mouseEvent->pos());
+            setRGB(qRed(rgb),qGreen(rgb),qBlue(rgb));
+        }
+    }
+    return QWidget::eventFilter(watched,event);
+}
+
 void CColorWidget::upUI()
 {
     _colorPicker->setGeometry(20 * _ratio ,20 * _ratio ,width() - 40 * _ratio,width() - 40 * _ratio);
@@ -187,6 +228,8 @@ void CColorWidget::upUI()
     _bSpin->setGeometry(_bLabel->geometry().right() + 8 * _ratio,_bLabel->y(),40 * _ratio,20 * _ratio);
 
     _colorNameEdit->setGeometry(_compareRect.left(),_compareRect.bottom() + 8 * _ratio,_compareRect.width(),20 * _ratio);
+
+    _pickColorBtn->setGeometry(_colorNameEdit->geometry().left(),_colorNameEdit->geometry().bottom() + 8 * _ratio,20 * _ratio, 20 * _ratio);
 //    _hueSpin->setGeometry(_colorPicker->geometry().left(),_colorPicker->geometry().bottom() + 8,40,20);
 //    _satSpin->setGeometry(_colorPicker->geometry().left(),_hueSpin->geometry().bottom() + 8,40,20);
 //    _valSpin->setGeometry(_colorPicker->geometry().left(),_satSpin->geometry().bottom() + 8,40,20);
@@ -249,6 +292,40 @@ void CColorWidget::setRGB()
     int b = _bSpin->value();
     _currentColor.setRgb(r,g,b);
     int h,s,v;
+    _currentColor.getHsv(&h,&s,&v);
+    _hueSpin->blockSignals(true);
+    _satSpin->blockSignals(true);
+    _valSpin->blockSignals(true);
+    _hueSpin->setValue(h);
+    _satSpin->setValue(s);
+    _valSpin->setValue(v);
+    _hueSpin->blockSignals(false);
+    _satSpin->blockSignals(false);
+    _valSpin->blockSignals(false);
+    _colorNameEdit->blockSignals(true);
+    _colorNameEdit->setText(_currentColor.name());
+    _colorNameEdit->blockSignals(false);
+    _colorPicker->blockSignals(true);
+    _colorPicker->setH(h);
+    _colorPicker->setS(s);
+    _colorPicker->blockSignals(false);
+    update();
+    emit currentColorChanged(_currentColor);
+}
+
+void CColorWidget::setRGB(int r, int g, int b)
+{
+    _currentColor.setRgb(r,g,b);
+    int h,s,v;
+    _rSpin->blockSignals(true);
+    _gSpin->blockSignals(true);
+    _bSpin->blockSignals(true);
+    _rSpin->setValue(r);
+    _gSpin->setValue(g);
+    _bSpin->setValue(b);
+    _rSpin->blockSignals(false);
+    _gSpin->blockSignals(false);
+    _bSpin->blockSignals(false);
     _currentColor.getHsv(&h,&s,&v);
     _hueSpin->blockSignals(true);
     _satSpin->blockSignals(true);

@@ -6,6 +6,7 @@ class CColorPicker;
 class QSpinBox;
 class QLineEdit;
 class QLabel;
+class QToolButton;
 
 class CColorWidget : public QWidget
 {
@@ -20,7 +21,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event);
     virtual void mouseMoveEvent(QMouseEvent *event);
     virtual void mouseReleaseEvent(QMouseEvent *event);
-
+    virtual bool eventFilter(QObject *watched, QEvent *event);
 private:
     void upUI();
 signals:
@@ -29,6 +30,7 @@ public slots:
     void setHSV(const int &h,const int &s,const int &v);
     void setHSV();
     void setRGB();
+    void setRGB(int r,int g,int b);
     void setColorName(const QString &name);
 private:
     CColorPicker *_colorPicker = nullptr;
@@ -48,6 +50,8 @@ private:
     QLabel *_gLabel;
     QLabel *_bLabel;
 
+    QToolButton *_pickColorBtn;
+
     QLineEdit *_colorNameEdit;      //颜色名字16进制
 
     QRect _valRect;                 //v 编辑区域
@@ -56,6 +60,9 @@ private:
     QList<QColor> _definedColorList;    //预定义颜色
 
     qreal _ratio = 1.0;
+
+    QPixmap _fullScreenImage;
+    QWidget *_maskWidget = nullptr;
 
 };
 
